@@ -9,17 +9,23 @@ import { GifExporter } from '../services/gifExporter';
 interface AnimationPanelProps {
   currentSettings: Settings;
   onSettingsChange: (settings: Settings) => void;
+  keyframes: Keyframe[];
+  onKeyframesChange: (keyframes: Keyframe[]) => void;
+  loopMode: LoopMode;
+  onLoopModeChange: (mode: LoopMode) => void;
 }
 
 export const AnimationPanel: React.FC<AnimationPanelProps> = ({
   currentSettings,
   onSettingsChange,
+  keyframes,
+  onKeyframesChange,
+  loopMode,
+  onLoopModeChange,
 }) => {
-  const [keyframes, setKeyframes] = useState<Keyframe[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
-  const [loopMode, setLoopMode] = useState<LoopMode>('none');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
 
@@ -74,20 +80,20 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
       normalizedTimestamp,
       2000 // Default 2 second duration
     );
-    setKeyframes(prev => KeyframeManager.insertKeyframe(prev, newKeyframe));
-  }, [currentSettings, keyframes.length, totalDuration]);
+    onKeyframesChange(KeyframeManager.insertKeyframe(keyframes, newKeyframe));
+  }, [currentSettings, keyframes, totalDuration, onKeyframesChange]);
 
   const handleKeyframeSelect = useCallback((keyframe: Keyframe) => {
     onSettingsChange(keyframe.settings);
   }, [onSettingsChange]);
 
   const handleKeyframeDelete = useCallback((keyframeId: string) => {
-    setKeyframes(prev => KeyframeManager.removeKeyframe(prev, keyframeId));
-  }, []);
+    onKeyframesChange(KeyframeManager.removeKeyframe(keyframes, keyframeId));
+  }, [keyframes, onKeyframesChange]);
 
   const handleKeyframeUpdate = useCallback((keyframeId: string, updates: Partial<Keyframe>) => {
-    setKeyframes(prev => KeyframeManager.updateKeyframe(prev, keyframeId, updates));
-  }, []);
+    onKeyframesChange(KeyframeManager.updateKeyframe(keyframes, keyframeId, updates));
+  }, [keyframes, onKeyframesChange]);
 
   const handleSeekTo = useCallback((time: number) => {
     if (animationEngineRef.current) {
@@ -171,21 +177,21 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
       try {
         const jsonData = e.target?.result as string;
         const importedKeyframes = KeyframeManager.importKeyframes(jsonData);
-        setKeyframes(importedKeyframes);
+        onKeyframesChange(importedKeyframes);
       } catch (error) {
         alert('Failed to load keyframes: ' + (error as Error).message);
       }
     };
     reader.readAsText(file);
     event.target.value = ''; // Reset input
-  }, []);
+  }, [onKeyframesChange]);
 
   const handleClearKeyframes = useCallback(() => {
     if (confirm('Are you sure you want to clear all keyframes?')) {
-      setKeyframes([]);
+      onKeyframesChange([]);
       handleStop();
     }
-  }, [handleStop]);
+  }, [onKeyframesChange, handleStop]);
 
   return (
     <div className="bg-gray-900 text-white space-y-4">
@@ -262,7 +268,7 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
             onPlay={handlePlay}
             onPause={handlePause}
             onStop={handleStop}
-            onLoopModeChange={setLoopMode}
+            onLoopModeChange={onLoopModeChange}
             onExportGif={handleExportGif}
             isExporting={isExporting}
             exportProgress={exportProgress}

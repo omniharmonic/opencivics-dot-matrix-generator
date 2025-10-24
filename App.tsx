@@ -3,7 +3,7 @@ import { ArtCanvas, type ArtCanvasHandles } from './components/ArtCanvas';
 import { ControlsPanel } from './components/ControlsPanel';
 import { AnimationPanel } from './components/AnimationPanel';
 import { generateGridPoints, generateArt } from './services/artGenerator';
-import { type Point, type Line, type Settings, Strategy } from './types';
+import { type Point, type Line, type Settings, type Keyframe, type LoopMode, Strategy } from './types';
 
 const App: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
@@ -26,6 +26,11 @@ const App: React.FC = () => {
   const [gridPoints, setGridPoints] = useState<Point[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
   const [activeTab, setActiveTab] = useState<'controls' | 'animation'>('controls');
+
+  // Animation state - lifted up to persist across tab switches
+  const [keyframes, setKeyframes] = useState<Keyframe[]>([]);
+  const [loopMode, setLoopMode] = useState<LoopMode>('none');
+
   const canvasRef = React.useRef<ArtCanvasHandles>(null);
   const canvasSize = 1000;
 
@@ -133,6 +138,10 @@ const App: React.FC = () => {
             <AnimationPanel
               currentSettings={settings}
               onSettingsChange={setSettings}
+              keyframes={keyframes}
+              onKeyframesChange={setKeyframes}
+              loopMode={loopMode}
+              onLoopModeChange={setLoopMode}
             />
           )}
         </div>
