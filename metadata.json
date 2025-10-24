@@ -1,0 +1,5 @@
+{
+  "name": "Generative Dot Connector",
+  "description": "An interactive tool to create generative art by connecting dots in a hexagonal grid. Adjust variables to create unique network patterns and export your creations as SVG or PNG.",
+  "requestFramePermissions": []
+}
