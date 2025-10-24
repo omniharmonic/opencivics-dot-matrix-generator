@@ -79,9 +79,10 @@ const App: React.FC = () => {
   const handleExportPng = () => canvasRef.current?.exportPng();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4 font-sans">
-      <main className="flex flex-col xl:flex-row gap-8 items-start max-w-7xl w-full">
-        <div className="flex-shrink-0 mx-auto">
+    <div className="min-h-screen bg-gray-900 text-white p-4 font-sans">
+      <main className="flex flex-col gap-6 max-w-7xl mx-auto">
+        {/* Canvas */}
+        <div className="flex justify-center">
           <ArtCanvas
             ref={canvasRef}
             points={gridPoints}
@@ -92,32 +93,32 @@ const App: React.FC = () => {
           />
         </div>
 
-        <div className="w-full xl:w-auto xl:min-w-[400px] space-y-4">
-          {/* Tab Navigation */}
-          <div className="bg-gray-800 rounded-lg p-1 flex">
-            <button
-              onClick={() => setActiveTab('controls')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'controls'
-                  ? 'bg-teal-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              Controls
-            </button>
-            <button
-              onClick={() => setActiveTab('animation')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'animation'
-                  ? 'bg-teal-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              Animation
-            </button>
-          </div>
+        {/* Tab Navigation */}
+        <div className="bg-gray-800 rounded-lg p-1 flex max-w-sm mx-auto">
+          <button
+            onClick={() => setActiveTab('controls')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'controls'
+                ? 'bg-teal-500 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            Controls
+          </button>
+          <button
+            onClick={() => setActiveTab('animation')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'animation'
+                ? 'bg-teal-500 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            Animation
+          </button>
+        </div>
 
-          {/* Tab Content */}
+        {/* Tab Content */}
+        <div className="w-full">
           {activeTab === 'controls' && (
             <ControlsPanel
               settings={settings}
