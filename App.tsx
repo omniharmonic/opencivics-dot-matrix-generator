@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ArtCanvas, type ArtCanvasHandles } from './components/ArtCanvas';
 import { ControlsPanel } from './components/ControlsPanel';
+import { AnimationPanel } from './components/AnimationPanel';
 import { generateGridPoints, generateArt } from './services/artGenerator';
 import { type Point, type Line, type Settings, Strategy } from './types';
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
 
   const [gridPoints, setGridPoints] = useState<Point[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
+  const [activeTab, setActiveTab] = useState<'controls' | 'animation'>('controls');
   const canvasRef = React.useRef<ArtCanvasHandles>(null);
   const canvasSize = 1000;
 
@@ -78,8 +80,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4 font-sans">
-      <main className="flex flex-col md:flex-row gap-8 items-start">
-        <div className="flex-shrink-0">
+      <main className="flex flex-col xl:flex-row gap-8 items-start max-w-7xl w-full">
+        <div className="flex-shrink-0 mx-auto">
           <ArtCanvas
             ref={canvasRef}
             points={gridPoints}
@@ -89,14 +91,49 @@ const App: React.FC = () => {
             height={canvasSize}
           />
         </div>
-        <div className="w-full md:w-auto">
-          <ControlsPanel
-            settings={settings}
-            onSettingsChange={handleSettingsChange}
-            onRandomizeSeed={handleRandomizeSeed}
-            onExportSvg={handleExportSvg}
-            onExportPng={handleExportPng}
-          />
+
+        <div className="w-full xl:w-auto xl:min-w-[400px] space-y-4">
+          {/* Tab Navigation */}
+          <div className="bg-gray-800 rounded-lg p-1 flex">
+            <button
+              onClick={() => setActiveTab('controls')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'controls'
+                  ? 'bg-teal-500 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              Controls
+            </button>
+            <button
+              onClick={() => setActiveTab('animation')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'animation'
+                  ? 'bg-teal-500 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              Animation
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === 'controls' && (
+            <ControlsPanel
+              settings={settings}
+              onSettingsChange={handleSettingsChange}
+              onRandomizeSeed={handleRandomizeSeed}
+              onExportSvg={handleExportSvg}
+              onExportPng={handleExportPng}
+            />
+          )}
+
+          {activeTab === 'animation' && (
+            <AnimationPanel
+              currentSettings={settings}
+              onSettingsChange={setSettings}
+            />
+          )}
         </div>
       </main>
     </div>

@@ -26,13 +26,13 @@ export interface Settings {
   strategy: Strategy;
   startRing: number;
   endRing: number;
-  
+
   // Algorithm Parameters
   tangentialStep: number;
   radialTwist: number;
   clusterCount: number;
   maxConnections: number;
-  
+
   // Appearance
   lineWidth: number;
   dotSize: number;
@@ -40,4 +40,35 @@ export interface Settings {
 
   // Seed for randomness
   seed: number;
+}
+
+export interface Keyframe {
+  id: string;
+  name: string;
+  timestamp: number; // position in timeline (0-1)
+  settings: Settings;
+  duration: number; // transition duration to this keyframe in milliseconds
+}
+
+export type LoopMode = 'none' | 'loop' | 'pingpong';
+
+export interface AnimationState {
+  keyframes: Keyframe[];
+  isPlaying: boolean;
+  currentTime: number; // 0-1 normalized timeline position
+  totalDuration: number; // total animation duration in milliseconds
+  loopMode: LoopMode;
+  fps: number; // frames per second for export
+}
+
+export interface ExportOptions {
+  width: number;
+  height: number;
+  fps: number;
+  quality: number;
+  withAlpha: boolean;
+}
+
+export interface EasingFunction {
+  (t: number): number;
 }
