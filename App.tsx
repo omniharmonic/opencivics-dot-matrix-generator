@@ -84,44 +84,41 @@ const App: React.FC = () => {
   const handleExportPng = () => canvasRef.current?.exportPng();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 font-sans">
-      <main className="flex flex-col gap-6 max-w-7xl mx-auto">
-        {/* Top Section: Canvas + Controls */}
-        <div className="flex flex-col xl:flex-row gap-6 items-start">
-          <div className="flex-shrink-0 mx-auto xl:mx-0">
-            <ArtCanvas
-              ref={canvasRef}
-              points={gridPoints}
-              lines={lines}
-              settings={settings}
-              width={canvasSize}
-              height={canvasSize}
-            />
-          </div>
+    <div className="min-h-screen bg-gray-900 text-white font-sans relative">
+      {/* Canvas Container */}
+      <div className="flex justify-center items-center min-h-screen p-4 pr-[420px]">
+        <ArtCanvas
+          ref={canvasRef}
+          points={gridPoints}
+          lines={lines}
+          settings={settings}
+          width={canvasSize}
+          height={canvasSize}
+        />
+      </div>
 
-          <div className="w-full xl:w-auto xl:min-w-[400px]">
-            <ControlsPanel
-              settings={settings}
-              onSettingsChange={handleSettingsChange}
-              onRandomizeSeed={handleRandomizeSeed}
-              onExportSvg={handleExportSvg}
-              onExportPng={handleExportPng}
-            />
-          </div>
-        </div>
+      {/* Floating Controls Panel */}
+      <div className="fixed top-4 right-4 bottom-4 w-[400px] z-10">
+        <ControlsPanel
+          settings={settings}
+          onSettingsChange={handleSettingsChange}
+          onRandomizeSeed={handleRandomizeSeed}
+          onExportSvg={handleExportSvg}
+          onExportPng={handleExportPng}
+        />
+      </div>
 
-        {/* Bottom Section: Animation Panel */}
-        <div className="w-full">
-          <AnimationPanel
-            currentSettings={settings}
-            onSettingsChange={setSettings}
-            keyframes={keyframes}
-            onKeyframesChange={setKeyframes}
-            loopMode={loopMode}
-            onLoopModeChange={setLoopMode}
-          />
-        </div>
-      </main>
+      {/* Bottom Animation Panel */}
+      <div className="fixed bottom-0 left-0 right-[420px] z-10 p-4">
+        <AnimationPanel
+          currentSettings={settings}
+          onSettingsChange={setSettings}
+          keyframes={keyframes}
+          onKeyframesChange={setKeyframes}
+          loopMode={loopMode}
+          onLoopModeChange={setLoopMode}
+        />
+      </div>
     </div>
   );
 };
