@@ -26,6 +26,7 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
 
@@ -44,6 +45,7 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
         const progress = animationEngineRef.current.getProgress();
         setCurrentTime(progress.currentTime);
         setIsPlaying(progress.isPlaying);
+        setDirection(progress.direction);
       }
       requestAnimationFrame(updateProgress);
     };

@@ -56,7 +56,7 @@ export const AnimationControls: React.FC<AnimationControlsProps> = ({
   const getLoopModeIcon = (mode: LoopMode): string => {
     switch (mode) {
       case 'none': return '→';
-      case 'loop': return '↻';
+      case 'loop': return '🔄';
       case 'pingpong': return '⇄';
       default: return '→';
     }
@@ -64,10 +64,10 @@ export const AnimationControls: React.FC<AnimationControlsProps> = ({
 
   const getLoopModeLabel = (mode: LoopMode): string => {
     switch (mode) {
-      case 'none': return 'No Loop';
-      case 'loop': return 'Loop';
+      case 'none': return 'Play Once';
+      case 'loop': return 'Loop Infinite';
       case 'pingpong': return 'Ping Pong';
-      default: return 'No Loop';
+      default: return 'Play Once';
     }
   };
 
@@ -77,6 +77,11 @@ export const AnimationControls: React.FC<AnimationControlsProps> = ({
         <h3 className="text-lg font-semibold text-white">Animation Controls</h3>
         <div className="text-sm text-gray-400">
           {formatTime(currentTime)} / {formatTime(totalDuration)}
+          {isPlaying && loopMode !== 'none' && (
+            <span className="ml-2 text-teal-400">
+              {loopMode === 'loop' ? '🔄' : '⇄'} {getLoopModeLabel(loopMode)}
+            </span>
+          )}
         </div>
       </div>
 

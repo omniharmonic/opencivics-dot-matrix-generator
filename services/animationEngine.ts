@@ -48,7 +48,21 @@ export class AnimationEngine {
     if (this.keyframes.length === 0) return;
 
     this.isPlaying = true;
-    this.startTime = performance.now() - this.currentTime;
+
+    // If at the end and loop mode is 'none', restart from beginning
+    if (this.currentTime >= this.totalDuration && this.loopMode === 'none') {
+      this.currentTime = 0;
+      this.direction = 1;
+    }
+
+    // Calculate start time based on current position and direction
+    if (this.direction === 1) {
+      this.startTime = performance.now() - this.currentTime;
+    } else {
+      // For reverse direction (pingpong), calculate from the end
+      this.startTime = performance.now() - (this.totalDuration - this.currentTime);
+    }
+
     this.animate();
   }
 
@@ -92,43 +106,54 @@ export class AnimationEngine {
     if (!this.isPlaying) return;
 
     const now = performance.now();
-    this.currentTime = (now - this.startTime) * this.direction;
+    const elapsed = now - this.startTime;
+    this.currentTime = elapsed * this.direction;
 
-    // Handle loop modes
+    // Handle loop modes and boundary conditions
+    let shouldContinue = true;
+
     if (this.direction === 1 && this.currentTime >= this.totalDuration) {
+      // Forward direction reached end
       switch (this.loopMode) {
         case 'none':
           this.currentTime = this.totalDuration;
-          this.pause();
+          shouldContinue = false;
           break;
         case 'loop':
+          // Reset to beginning and restart
           this.currentTime = 0;
           this.startTime = now;
           break;
         case 'pingpong':
+          // Switch to reverse direction
           this.currentTime = this.totalDuration;
           this.direction = -1;
-          this.startTime = now - this.totalDuration;
+          this.startTime = now;
           break;
       }
     } else if (this.direction === -1 && this.currentTime <= 0) {
-      switch (this.loopMode) {
-        case 'pingpong':
-          this.currentTime = 0;
-          this.direction = 1;
-          this.startTime = now;
-          break;
-        default:
-          this.currentTime = 0;
-          this.pause();
-          break;
+      // Reverse direction reached beginning (only possible in pingpong)
+      if (this.loopMode === 'pingpong') {
+        // Switch back to forward direction
+        this.currentTime = 0;
+        this.direction = 1;
+        this.startTime = now;
+      } else {
+        // Shouldn't happen, but safety fallback
+        this.currentTime = 0;
+        shouldContinue = false;
       }
     }
 
+    // Clamp time to valid range
+    this.currentTime = Math.max(0, Math.min(this.totalDuration, this.currentTime));
+
     this.updateCurrentSettings();
 
-    if (this.isPlaying) {
+    if (this.isPlaying && shouldContinue) {
       this.animationId = requestAnimationFrame(this.animate);
+    } else if (!shouldContinue) {
+      this.pause();
     }
   };
 
@@ -263,6 +288,7 @@ export class AnimationEngine {
     normalizedTime: number;
     isPlaying: boolean;
     loopMode: LoopMode;
+    direction: number;
   } {
     return {
       currentTime: this.currentTime,
@@ -270,6 +296,7 @@ export class AnimationEngine {
       normalizedTime: this.getNormalizedTime(),
       isPlaying: this.isPlaying,
       loopMode: this.loopMode,
+      direction: this.direction,
     };
   }
 }
