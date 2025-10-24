@@ -89,15 +89,19 @@ const connectPoints = (points: Point[], settings: Settings, rand: () => number):
 export const generateArt = (points: Point[], settings: Settings): Line[] => {
   const rand = mulberry32(settings.seed);
   const { strategy, startRing, endRing, clusterCount, maxConnections } = settings;
-  
+
   const activePoints = points.filter(p => p.ring >= startRing && p.ring <= endRing);
   if (activePoints.length === 0) return [];
-  
+
   switch (strategy) {
     case Strategy.Web:
+        return generateWebStrategy(points, settings, rand);
+
     case Strategy.Spokes:
+        return generateSpokesStrategy(points, settings, rand);
+
     case Strategy.Swirl:
-        return connectPoints(points, settings, rand);
+        return generateSwirlStrategy(points, settings, rand);
 
     case Strategy.Random: {
         const lines: Line[] = [];
@@ -115,7 +119,7 @@ export const generateArt = (points: Point[], settings: Settings): Line[] => {
         }
         return lines;
     }
-    
+
     case Strategy.Clusters: {
         const lines: Line[] = [];
         const centers = [...Array(clusterCount)].map(() => activePoints[Math.floor(rand() * activePoints.length)]);
@@ -138,4 +142,91 @@ export const generateArt = (points: Point[], settings: Settings): Line[] => {
     default:
       return [];
   }
+};
+
+// Web Strategy: Connects both tangentially and radially for complex web patterns
+const generateWebStrategy = (points: Point[], settings: Settings, rand: () => number): Line[] => {
+  return connectPoints(points, settings, rand);
+};
+
+// Spokes Strategy: Primarily radial connections from center outward, minimal tangential
+const generateSpokesStrategy = (points: Point[], settings: Settings, rand: () => number): Line[] => {
+  const lines: Line[] = [];
+  const pointsByRing: Point[][] = [];
+
+  for(const p of points) {
+    if (!pointsByRing[p.ring]) pointsByRing[p.ring] = [];
+    pointsByRing[p.ring].push(p);
+  }
+
+  const { startRing, endRing, radialTwist, symmetrySides } = settings;
+
+  // Focus on radial connections (spokes), minimal tangential
+  for (let ring = startRing; ring < endRing; ring++) {
+    const currentRingPoints = pointsByRing[ring] || [];
+    const nextRingPoints = pointsByRing[ring + 1] || [];
+
+    if (nextRingPoints.length > 0 && currentRingPoints.length > 0) {
+        for (let i = 0; i < currentRingPoints.length; i++) {
+            const p1 = currentRingPoints[i];
+            const ratio = nextRingPoints.length / currentRingPoints.length;
+            const targetIndex = Math.round(i * ratio + (radialTwist * symmetrySides / 10));
+            const p2 = nextRingPoints[targetIndex % nextRingPoints.length];
+            if (p2) lines.push([p1.id, p2.id]);
+        }
+    }
+  }
+
+  return lines;
+};
+
+// Swirl Strategy: Emphasizes tangential connections with twisted radial connections
+const generateSwirlStrategy = (points: Point[], settings: Settings, rand: () => number): Line[] => {
+  const lines: Line[] = [];
+  const pointsByRing: Point[][] = [];
+
+  for(const p of points) {
+    if (!pointsByRing[p.ring]) pointsByRing[p.ring] = [];
+    pointsByRing[p.ring].push(p);
+  }
+
+  const { startRing, endRing, tangentialStep, radialTwist, symmetrySides } = settings;
+
+  for (let ring = startRing; ring <= endRing; ring++) {
+    const currentRingPoints = pointsByRing[ring] || [];
+    const nextRingPoints = pointsByRing[ring + 1] || [];
+
+    // Strong tangential connections for swirl effect
+    if (currentRingPoints.length > 1) {
+        for (let i = 0; i < currentRingPoints.length; i++) {
+            const p1 = currentRingPoints[i];
+            // Create multiple tangential connections for swirl effect
+            const step1 = Math.max(1, tangentialStep);
+            const step2 = Math.max(1, tangentialStep + 1);
+
+            const p2 = currentRingPoints[(i + step1) % currentRingPoints.length];
+            const p3 = currentRingPoints[(i + step2) % currentRingPoints.length];
+
+            lines.push([p1.id, p2.id]);
+            if (rand() > 0.5) { // Add some randomness
+                lines.push([p1.id, p3.id]);
+            }
+        }
+    }
+
+    // Twisted radial connections
+    if (ring < endRing && nextRingPoints.length > 0 && currentRingPoints.length > 0) {
+        for (let i = 0; i < currentRingPoints.length; i++) {
+            const p1 = currentRingPoints[i];
+            const ratio = nextRingPoints.length / currentRingPoints.length;
+            // Stronger twist for swirl effect
+            const twist = (radialTwist * symmetrySides / 5) + (rand() - 0.5) * 2;
+            const targetIndex = Math.round(i * ratio + twist);
+            const p2 = nextRingPoints[targetIndex % nextRingPoints.length];
+            if (p2) lines.push([p1.id, p2.id]);
+        }
+    }
+  }
+
+  return lines;
 };
