@@ -11,7 +11,8 @@ const mulberry32 = (a: number) => () => {
 export const generateGridPoints = (
   centerX: number,
   centerY: number,
-  ringCount: number,
+  startRing: number,
+  endRing: number,
   symmetrySides: number,
   chaos: number,
   seed: number,
@@ -20,22 +21,24 @@ export const generateGridPoints = (
   let idCounter = 0;
   const rand = mulberry32(seed);
 
-  if (ringCount <= 0 || symmetrySides < 3) return [];
+  if (endRing < startRing || symmetrySides < 3) return [];
 
   const maxRadius = Math.min(centerX, centerY) * 0.9;
-  const ringSpacing = maxRadius / (ringCount - 1 || 1);
+  const totalRings = endRing + 1; // +1 because ring 0 exists
+  const ringSpacing = maxRadius / (totalRings - 1 || 1);
 
-  for (let ring = 0; ring < ringCount; ring++) {
-    const radius = ring === 0 && ringCount > 1 ? 0 : ring * ringSpacing;
-    if (ring === 0 && ringCount > 1) {
-        // Special case for a single center point if there's more than one ring
+  for (let ring = connectionStartRing; ring <= connectionEndRing; ring++) {
+    const radius = ring === 0 ? 0 : ring * ringSpacing;
+
+    if (ring === 0) {
+        // Special case for center point
         const chaosX = (rand() - 0.5) * chaos * 10;
         const chaosY = (rand() - 0.5) * chaos * 10;
         points.push({ id: idCounter++, x: centerX + chaosX, y: centerY + chaosY, ring, angle: 0 });
         continue;
     }
-    
-    const pointsInRing = ring === 0 ? 1 : ring * symmetrySides;
+
+    const pointsInRing = ring * symmetrySides;
     for (let i = 0; i < pointsInRing; i++) {
       const angle = (i / pointsInRing) * 2 * Math.PI;
       const chaosX = (rand() - 0.5) * chaos * 10;
@@ -57,9 +60,9 @@ const connectPoints = (points: Point[], settings: Settings, rand: () => number):
     pointsByRing[p.ring].push(p);
   }
 
-  const { startRing, endRing, tangentialStep, radialTwist, symmetrySides } = settings;
+  const { connectionStartRing, connectionEndRing, tangentialStep, radialTwist, symmetrySides } = settings;
 
-  for (let ring = startRing; ring <= endRing; ring++) {
+  for (let ring = connectionStartRing; ring <= connectionEndRing; ring++) {
     const currentRingPoints = pointsByRing[ring] || [];
     const nextRingPoints = pointsByRing[ring + 1] || [];
     
@@ -73,7 +76,7 @@ const connectPoints = (points: Point[], settings: Settings, rand: () => number):
     }
     
     // Radial connections (between adjacent rings)
-    if (ring < endRing && nextRingPoints.length > 0 && currentRingPoints.length > 0) {
+    if (ring < connectionEndRing && nextRingPoints.length > 0 && currentRingPoints.length > 0) {
         for (let i = 0; i < currentRingPoints.length; i++) {
             const p1 = currentRingPoints[i];
             const ratio = nextRingPoints.length / currentRingPoints.length;
@@ -88,9 +91,9 @@ const connectPoints = (points: Point[], settings: Settings, rand: () => number):
 
 export const generateArt = (points: Point[], settings: Settings): Line[] => {
   const rand = mulberry32(settings.seed);
-  const { strategy, startRing, endRing, clusterCount, maxConnections } = settings;
+  const { strategy, connectionStartRing, connectionEndRing, clusterCount, maxConnections } = settings;
 
-  const activePoints = points.filter(p => p.ring >= startRing && p.ring <= endRing);
+  const activePoints = points.filter(p => p.ring >= connectionStartRing && p.ring <= connectionEndRing);
   if (activePoints.length === 0) return [];
 
   switch (strategy) {
@@ -159,10 +162,10 @@ const generateSpokesStrategy = (points: Point[], settings: Settings, rand: () =>
     pointsByRing[p.ring].push(p);
   }
 
-  const { startRing, endRing, radialTwist, symmetrySides } = settings;
+  const { connectionStartRing, connectionEndRing, radialTwist, symmetrySides } = settings;
 
   // Focus on radial connections (spokes), minimal tangential
-  for (let ring = startRing; ring < endRing; ring++) {
+  for (let ring = connectionStartRing; ring < connectionEndRing; ring++) {
     const currentRingPoints = pointsByRing[ring] || [];
     const nextRingPoints = pointsByRing[ring + 1] || [];
 
@@ -190,9 +193,9 @@ const generateSwirlStrategy = (points: Point[], settings: Settings, rand: () => 
     pointsByRing[p.ring].push(p);
   }
 
-  const { startRing, endRing, tangentialStep, radialTwist, symmetrySides } = settings;
+  const { connectionStartRing, connectionEndRing, tangentialStep, radialTwist, symmetrySides } = settings;
 
-  for (let ring = startRing; ring <= endRing; ring++) {
+  for (let ring = connectionStartRing; ring <= connectionEndRing; ring++) {
     const currentRingPoints = pointsByRing[ring] || [];
     const nextRingPoints = pointsByRing[ring + 1] || [];
 
@@ -215,7 +218,7 @@ const generateSwirlStrategy = (points: Point[], settings: Settings, rand: () => 
     }
 
     // Twisted radial connections
-    if (ring < endRing && nextRingPoints.length > 0 && currentRingPoints.length > 0) {
+    if (ring < connectionEndRing && nextRingPoints.length > 0 && currentRingPoints.length > 0) {
         for (let i = 0; i < currentRingPoints.length; i++) {
             const p1 = currentRingPoints[i];
             const ratio = nextRingPoints.length / currentRingPoints.length;

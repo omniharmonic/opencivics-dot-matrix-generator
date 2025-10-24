@@ -40,7 +40,8 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
     onSettingsChange({ [name]: isNumber ? parseFloat(value) : value });
   };
   
-  const maxRing = settings.ringCount > 0 ? settings.ringCount - 1 : 0;
+  const maxGridRing = 10; // Maximum possible ring
+  const maxConnectionRing = settings.gridEndRing;
   
   return (
     <div className="bg-gray-800 text-white rounded-lg shadow-2xl w-full h-full flex flex-col overflow-hidden">
@@ -50,7 +51,8 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         {/* Grid Structure */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-teal-400 uppercase tracking-wide">Grid Structure</h3>
-          <Slider label="Ring Count" name="ringCount" value={settings.ringCount.toString()} current={settings.ringCount} min={1} max={10} step={1} onChange={handleInputChange} />
+          <Slider label="Grid Start Ring" name="gridStartRing" value={settings.gridStartRing.toString()} current={settings.gridStartRing} min={0} max={maxGridRing} step={1} onChange={handleInputChange} />
+          <Slider label="Grid End Ring" name="gridEndRing" value={settings.gridEndRing.toString()} current={settings.gridEndRing} min={0} max={maxGridRing} step={1} onChange={handleInputChange} />
           <Slider label="Symmetry Sides" name="symmetrySides" value={settings.symmetrySides.toString()} current={settings.symmetrySides} min={3} max={12} step={1} onChange={handleInputChange} />
           <Slider label="Chaos" name="chaos" value={settings.chaos.toFixed(2)} current={settings.chaos} min={0} max={10} step={0.1} onChange={handleInputChange} />
         </div>
@@ -64,8 +66,8 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
               {Object.values(Strategy).map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <Slider label="Start Ring" name="startRing" value={settings.startRing.toString()} current={settings.startRing} min={0} max={maxRing} step={1} onChange={handleInputChange} />
-          <Slider label="End Ring" name="endRing" value={settings.endRing.toString()} current={settings.endRing} min={0} max={maxRing} step={1} onChange={handleInputChange} />
+          <Slider label="Start Ring" name="connectionStartRing" value={settings.connectionStartRing.toString()} current={settings.connectionStartRing} min={settings.gridStartRing} max={maxConnectionRing} step={1} onChange={handleInputChange} />
+          <Slider label="End Ring" name="connectionEndRing" value={settings.connectionEndRing.toString()} current={settings.connectionEndRing} min={settings.gridStartRing} max={maxConnectionRing} step={1} onChange={handleInputChange} />
         </div>
 
         {/* Algorithm Parameters */}

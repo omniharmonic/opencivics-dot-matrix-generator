@@ -7,12 +7,13 @@ import { type Point, type Line, type Settings, type Keyframe, type LoopMode, Str
 
 const App: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
-    ringCount: 4,
+    gridStartRing: 0,
+    gridEndRing: 4,
     symmetrySides: 6,
     chaos: 0,
     strategy: Strategy.Web,
-    startRing: 0,
-    endRing: 3,
+    connectionStartRing: 0,
+    connectionEndRing: 3,
     tangentialStep: 1,
     radialTwist: 0,
     clusterCount: 5,
@@ -39,20 +40,23 @@ const App: React.FC = () => {
     const points = generateGridPoints(
       canvasSize / 2,
       canvasSize / 2,
-      settings.ringCount,
+      settings.gridStartRing,
+      settings.gridEndRing,
       settings.symmetrySides,
       settings.chaos,
       settings.seed
     );
     setGridPoints(points);
 
-    // Clamp start/end rings to valid range
-    const maxRing = settings.ringCount > 0 ? settings.ringCount -1 : 0;
-    if(settings.startRing > maxRing || settings.endRing > maxRing) {
-        setSettings(s => ({...s, startRing: 0, endRing: maxRing}));
+    // Clamp connection rings to valid grid range
+    const maxRing = settings.gridEndRing;
+    const minRing = settings.gridStartRing;
+    if(settings.connectionStartRing < minRing || settings.connectionStartRing > maxRing ||
+       settings.connectionEndRing < minRing || settings.connectionEndRing > maxRing) {
+        setSettings(s => ({...s, connectionStartRing: minRing, connectionEndRing: maxRing}));
     }
 
-  }, [settings.ringCount, settings.symmetrySides, settings.chaos, settings.seed]);
+  }, [settings.gridStartRing, settings.gridEndRing, settings.symmetrySides, settings.chaos, settings.seed]);
 
   // Regenerate art (lines) when any setting changes
   useEffect(() => {
@@ -65,13 +69,23 @@ const App: React.FC = () => {
   const handleSettingsChange = (newSettings: Partial<Settings>) => {
     setSettings(prev => {
         const updated = { ...prev, ...newSettings };
-        // Ensure end ring is not smaller than start ring
-        if (newSettings.startRing !== undefined && newSettings.startRing > updated.endRing) {
-            updated.endRing = newSettings.startRing;
+
+        // Ensure grid end ring is not smaller than grid start ring
+        if (newSettings.gridStartRing !== undefined && newSettings.gridStartRing > updated.gridEndRing) {
+            updated.gridEndRing = newSettings.gridStartRing;
         }
-        if (newSettings.endRing !== undefined && newSettings.endRing < updated.startRing) {
-            updated.startRing = newSettings.endRing;
+        if (newSettings.gridEndRing !== undefined && newSettings.gridEndRing < updated.gridStartRing) {
+            updated.gridStartRing = newSettings.gridEndRing;
         }
+
+        // Ensure connection end ring is not smaller than connection start ring
+        if (newSettings.connectionStartRing !== undefined && newSettings.connectionStartRing > updated.connectionEndRing) {
+            updated.connectionEndRing = newSettings.connectionStartRing;
+        }
+        if (newSettings.connectionEndRing !== undefined && newSettings.connectionEndRing < updated.connectionStartRing) {
+            updated.connectionStartRing = newSettings.connectionEndRing;
+        }
+
         return updated;
     });
   };
@@ -86,7 +100,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans relative">
       {/* Canvas Container */}
-      <div className="flex justify-center items-center min-h-screen p-4 pr-[420px] pb-[200px]">
+      <div className="flex justify-center items-center min-h-screen p-4 pr-[420px] pb-[320px]">
         <ArtCanvas
           ref={canvasRef}
           points={gridPoints}
@@ -109,7 +123,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Bottom Animation Panel */}
-      <div className="fixed bottom-0 left-0 right-[420px] z-10 p-4">
+      <div className="fixed bottom-0 left-0 right-[420px] z-10 p-4 max-h-[300px] overflow-y-auto">
         <AnimationPanel
           currentSettings={settings}
           onSettingsChange={setSettings}

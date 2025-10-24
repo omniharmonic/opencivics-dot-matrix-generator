@@ -18,14 +18,15 @@ export enum Strategy {
 
 export interface Settings {
   // Grid Structure
-  ringCount: number;
+  gridStartRing: number;
+  gridEndRing: number;
   symmetrySides: number;
   chaos: number;
 
   // Connection Rules
   strategy: Strategy;
-  startRing: number;
-  endRing: number;
+  connectionStartRing: number;
+  connectionEndRing: number;
 
   // Algorithm Parameters
   tangentialStep: number;
