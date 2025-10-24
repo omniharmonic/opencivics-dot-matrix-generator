@@ -146,15 +146,15 @@ export const Timeline: React.FC<TimelineProps> = ({
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
       <div className="mb-2 flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-white">Timeline</h3>
-        <div className="text-sm text-gray-400">
+        <h3 className="text-base md:text-lg font-semibold text-white">Timeline</h3>
+        <div className="text-xs md:text-sm text-gray-400">
           {formatTime(currentTime)} / {formatTime(totalDuration)}
         </div>
       </div>
 
       <div
         ref={timelineRef}
-        className="relative h-16 bg-gray-700 rounded cursor-pointer border border-gray-600"
+        className="relative h-20 md:h-16 bg-gray-700 rounded cursor-pointer border border-gray-600 touch-manipulation"
         onClick={handleTimelineClick}
         onDoubleClick={handleTimelineDoubleClick}
       >
@@ -223,7 +223,8 @@ export const Timeline: React.FC<TimelineProps> = ({
       </div>
 
       <div className="mt-2 text-xs text-gray-400">
-        Double-click timeline to add keyframe • Right-click keyframe to delete • Double-click keyframe to rename
+        <span className="hidden md:inline">Double-click timeline to add keyframe • Right-click keyframe to delete • Double-click keyframe to rename</span>
+        <span className="md:hidden">Tap timeline to add • Long press to delete/rename</span>
       </div>
     </div>
   );

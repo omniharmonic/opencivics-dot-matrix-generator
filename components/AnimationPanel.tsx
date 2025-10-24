@@ -199,31 +199,31 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
     <div className="bg-gray-900 text-white space-y-4">
       <div className="bg-gray-800 p-4 rounded-lg">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-teal-400">Animation Studio</h2>
-          <div className="text-sm text-gray-400">
+          <h2 className="text-lg md:text-xl font-bold text-teal-400">Animation Studio</h2>
+          <div className="text-xs md:text-sm text-gray-400">
             {keyframes.length} keyframe{keyframes.length !== 1 ? 's' : ''}
           </div>
         </div>
 
         {/* Keyframe Management */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 mb-4">
           <button
             onClick={() => handleAddKeyframe()}
-            className="px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm transition-colors"
+            className="px-3 py-3 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white rounded-lg text-sm transition-colors touch-manipulation"
           >
-            Save Current State
+            Save State
           </button>
 
           <button
             onClick={handleSaveKeyframes}
             disabled={keyframes.length === 0}
-            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg text-sm transition-colors"
+            className="px-3 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-600 text-white rounded-lg text-sm transition-colors touch-manipulation"
           >
-            Export Keyframes
+            Export
           </button>
 
-          <label className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors cursor-pointer">
-            Import Keyframes
+          <label className="px-3 py-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-lg text-sm transition-colors cursor-pointer touch-manipulation flex items-center justify-center">
+            Import
             <input
               type="file"
               accept=".json"
@@ -235,7 +235,7 @@ export const AnimationPanel: React.FC<AnimationPanelProps> = ({
           <button
             onClick={handleClearKeyframes}
             disabled={keyframes.length === 0}
-            className="px-3 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg text-sm transition-colors"
+            className="px-3 py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:bg-gray-600 text-white rounded-lg text-sm transition-colors touch-manipulation"
           >
             Clear All
           </button>
