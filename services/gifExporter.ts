@@ -45,11 +45,11 @@ export class GifExporter {
         repeat: repeat, // Set loop behavior
       });
 
-      // Add timeout for the entire GIF creation process
+      // Add timeout for the entire GIF creation process - extended for high frame counts
       const timeout = setTimeout(() => {
         this.gif?.abort();
-        reject(new Error('GIF creation timed out after 30 seconds'));
-      }, 30000);
+        reject(new Error('GIF creation timed out after 5 minutes'));
+      }, 300000); // 5 minutes timeout
 
       this.gif.on('progress', (progress: number) => {
         onProgress?.(progress);

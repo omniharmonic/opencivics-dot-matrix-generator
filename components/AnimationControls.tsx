@@ -244,6 +244,17 @@ export const AnimationControls: React.FC<AnimationControlsProps> = ({
                   Transparent background
                 </label>
               </div>
+
+              <div className="p-3 bg-gray-700 rounded-lg">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Loop Mode: {exportOptions.loopMode}
+                </label>
+                <div className="text-xs text-gray-500">
+                  {exportOptions.loopMode === 'none' && 'GIF will play once and stop'}
+                  {exportOptions.loopMode === 'loop' && 'GIF will loop infinitely'}
+                  {exportOptions.loopMode === 'pingpong' && 'GIF will play forward then backward infinitely'}
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-2 mt-6">
