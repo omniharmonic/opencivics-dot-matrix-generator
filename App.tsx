@@ -100,7 +100,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans relative">
       {/* Canvas Container */}
-      <div className="flex justify-center items-center min-h-screen p-4 pr-[420px] pb-[320px]">
+      <div className="flex justify-center items-center min-h-screen p-4 pr-[420px] pb-[500px]">
         <ArtCanvas
           ref={canvasRef}
           points={gridPoints}

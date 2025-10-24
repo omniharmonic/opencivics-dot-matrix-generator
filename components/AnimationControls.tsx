@@ -35,7 +35,13 @@ export const AnimationControls: React.FC<AnimationControlsProps> = ({
     fps: 30,
     quality: 0.8,
     withAlpha: false,
+    loopMode: loopMode, // Use current loop mode
   });
+
+  // Update export options when loop mode changes
+  React.useEffect(() => {
+    setExportOptions(prev => ({ ...prev, loopMode }));
+  }, [loopMode]);
 
   const formatTime = (time: number): string => {
     const seconds = Math.floor(time / 1000);

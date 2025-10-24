@@ -16,32 +16,66 @@ export class GifExporter {
     onProgress?: (progress: number) => void
   ): Promise<Blob> {
     return new Promise((resolve, reject) => {
+      // Handle different loop modes by modifying the frame sequence
+      let finalFrames = [...settingsFrames];
+
+      if (options.loopMode === 'pingpong') {
+        // For pingpong, add the reverse sequence (excluding first and last to avoid duplicates)
+        const reverseFrames = [...settingsFrames].reverse().slice(1, -1);
+        finalFrames = [...settingsFrames, ...reverseFrames];
+        console.log(`Pingpong mode: expanded from ${settingsFrames.length} to ${finalFrames.length} frames`);
+      }
+
+      console.log(`Creating GIF with ${finalFrames.length} frames, loop mode: ${options.loopMode}`);
+
+      // Set loop count based on loop mode
+      let repeat = 0; // gif.js: 0 = infinite loop, >0 = loop that many times
+      if (options.loopMode === 'none') {
+        repeat = 1; // Play once only
+      }
+
       this.gif = new GIF({
-        workers: 2,
-        quality: 10 - Math.floor(options.quality * 9), // gif.js uses inverted quality (10 = lowest)
+        workers: 2, // Re-enable workers for performance
+        workerScript: '/gif.worker.js', // Explicit path to worker in public directory
+        quality: 10 - Math.floor(options.quality * 9), // Restore original quality calculation
         width: options.width,
         height: options.height,
         transparent: options.withAlpha ? 0x00FFFFFF : null,
         background: options.withAlpha ? null : '#FFFFFF',
+        repeat: repeat, // Set loop behavior
       });
+
+      // Add timeout for the entire GIF creation process
+      const timeout = setTimeout(() => {
+        this.gif?.abort();
+        reject(new Error('GIF creation timed out after 30 seconds'));
+      }, 30000);
 
       this.gif.on('progress', (progress: number) => {
         onProgress?.(progress);
       });
 
       this.gif.on('finished', (blob: Blob) => {
+        clearTimeout(timeout);
+        console.log('GIF creation completed successfully');
         resolve(blob);
       });
 
       this.gif.on('error', (error: Error) => {
+        clearTimeout(timeout);
+        console.error('GIF creation error:', error);
         reject(error);
       });
 
-      this.addFramesToGif(settingsFrames, options)
+      this.addFramesToGif(finalFrames, options)
         .then(() => {
+          console.log('Starting GIF render...');
           this.gif!.render();
         })
-        .catch(reject);
+        .catch((error) => {
+          clearTimeout(timeout);
+          reject(error);
+        });
     });
   }
 
@@ -51,15 +85,30 @@ export class GifExporter {
   ): Promise<void> {
     const frameDuration = 1000 / options.fps; // Duration per frame in milliseconds
 
+    console.log(`Adding ${settingsFrames.length} frames to GIF...`);
+
     for (let i = 0; i < settingsFrames.length; i++) {
       const settings = settingsFrames[i];
-      const canvas = await this.renderFrame(settings, options);
 
-      this.gif!.addFrame(canvas, {
-        delay: frameDuration,
-        copy: true,
-      });
+      try {
+        const canvas = await this.renderFrame(settings, options);
+
+        this.gif!.addFrame(canvas, {
+          delay: frameDuration,
+          copy: true,
+        });
+
+        // Progress feedback every 10 frames
+        if (i % 10 === 0 || i === settingsFrames.length - 1) {
+          console.log(`Added frame ${i + 1}/${settingsFrames.length}`);
+        }
+      } catch (error) {
+        console.error(`Error rendering frame ${i + 1}:`, error);
+        throw error;
+      }
     }
+
+    console.log('All frames added to GIF, starting render...');
   }
 
   private async renderFrame(
@@ -70,7 +119,8 @@ export class GifExporter {
     const points = generateGridPoints(
       this.canvasSize / 2,
       this.canvasSize / 2,
-      settings.ringCount,
+      settings.gridStartRing,
+      settings.gridEndRing,
       settings.symmetrySides,
       settings.chaos,
       settings.seed
@@ -166,38 +216,48 @@ export class GifExporter {
     options: ExportOptions
   ): Promise<HTMLCanvasElement> {
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('SVG to canvas conversion timed out'));
+      }, 10000); // 10 second timeout
+
       const svgData = new XMLSerializer().serializeToString(svg);
       const svgUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
 
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = options.width;
-        canvas.height = options.height;
-        const ctx = canvas.getContext('2d');
+        clearTimeout(timeout);
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = options.width;
+          canvas.height = options.height;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
-          return;
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+
+          if (!options.withAlpha) {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, options.width, options.height);
+          }
+
+          const scale = Math.min(options.width / this.canvasSize, options.height / this.canvasSize);
+          const scaledWidth = this.canvasSize * scale;
+          const scaledHeight = this.canvasSize * scale;
+          const offsetX = (options.width - scaledWidth) / 2;
+          const offsetY = (options.height - scaledHeight) / 2;
+
+          ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+          resolve(canvas);
+        } catch (error) {
+          reject(new Error(`Canvas drawing failed: ${error}`));
         }
-
-        if (!options.withAlpha) {
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, options.width, options.height);
-        }
-
-        const scale = Math.min(options.width / this.canvasSize, options.height / this.canvasSize);
-        const scaledWidth = this.canvasSize * scale;
-        const scaledHeight = this.canvasSize * scale;
-        const offsetX = (options.width - scaledWidth) / 2;
-        const offsetY = (options.height - scaledHeight) / 2;
-
-        ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
-        resolve(canvas);
       };
 
-      img.onerror = () => {
-        reject(new Error('Failed to load SVG image'));
+      img.onerror = (error) => {
+        clearTimeout(timeout);
+        reject(new Error(`Failed to load SVG image: ${error}`));
       };
 
       img.src = svgUrl;

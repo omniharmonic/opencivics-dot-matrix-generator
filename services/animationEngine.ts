@@ -232,14 +232,15 @@ export class AnimationEngine {
   ): Settings {
     return {
       // Grid Structure
-      ringCount: Math.round(this.lerp(from.ringCount, to.ringCount, progress)),
+      gridStartRing: Math.round(this.lerp(from.gridStartRing, to.gridStartRing, progress)),
+      gridEndRing: Math.round(this.lerp(from.gridEndRing, to.gridEndRing, progress)),
       symmetrySides: Math.round(this.lerp(from.symmetrySides, to.symmetrySides, progress)),
       chaos: this.lerp(from.chaos, to.chaos, progress),
 
       // Connection Rules
       strategy: progress < 0.5 ? from.strategy : to.strategy, // Discrete value
-      startRing: Math.round(this.lerp(from.startRing, to.startRing, progress)),
-      endRing: Math.round(this.lerp(from.endRing, to.endRing, progress)),
+      connectionStartRing: Math.round(this.lerp(from.connectionStartRing, to.connectionStartRing, progress)),
+      connectionEndRing: Math.round(this.lerp(from.connectionEndRing, to.connectionEndRing, progress)),
 
       // Algorithm Parameters
       tangentialStep: Math.round(this.lerp(from.tangentialStep, to.tangentialStep, progress)),

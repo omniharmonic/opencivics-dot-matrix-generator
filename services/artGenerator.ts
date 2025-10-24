@@ -27,7 +27,7 @@ export const generateGridPoints = (
   const totalRings = endRing + 1; // +1 because ring 0 exists
   const ringSpacing = maxRadius / (totalRings - 1 || 1);
 
-  for (let ring = connectionStartRing; ring <= connectionEndRing; ring++) {
+  for (let ring = startRing; ring <= endRing; ring++) {
     const radius = ring === 0 ? 0 : ring * ringSpacing;
 
     if (ring === 0) {

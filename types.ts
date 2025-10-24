@@ -68,6 +68,7 @@ export interface ExportOptions {
   fps: number;
   quality: number;
   withAlpha: boolean;
+  loopMode: LoopMode;
 }
 
 export interface EasingFunction {
