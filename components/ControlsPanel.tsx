@@ -9,17 +9,17 @@ interface ControlsPanelProps {
   onExportPng: () => void;
 }
 
-const Slider: React.FC<{label: string, value: string, name: keyof Settings, current: number, min: number, max: number, step: number, onChange: any}> = 
+const Slider: React.FC<{label: string, value: string, name: keyof Settings, current: number, min: number, max: number, step: number, onChange: any}> =
   ({label, value, name, current, min, max, step, onChange}) => (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-400 mb-1">{label}: {value}</label>
+      <label htmlFor={name} className="block text-sm font-medium text-gray-400 mb-2">{label}: {value}</label>
       <input
         type="range"
         id={name}
         name={name}
         value={current}
         onChange={onChange}
-        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+        className="w-full h-2 md:h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer touch-manipulation"
         min={min}
         max={max}
         step={step}
@@ -44,10 +44,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
   const maxConnectionRing = settings.gridEndRing;
   
   return (
-    <div className="bg-gray-800 text-white rounded-lg shadow-2xl w-full h-full flex flex-col overflow-hidden">
-      <h2 className="text-xl font-bold text-center border-b border-gray-700 p-4 flex-shrink-0">Generative Controls</h2>
+    <div className="bg-gray-800 text-white md:rounded-lg md:shadow-2xl w-full h-full flex flex-col overflow-hidden">
+      <h2 className="hidden md:block text-xl font-bold text-center border-b border-gray-700 p-4 flex-shrink-0">Generative Controls</h2>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 md:space-y-4">
         {/* Grid Structure */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-teal-400 uppercase tracking-wide">Grid Structure</h3>
@@ -61,8 +61,8 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <div className="space-y-3 pt-2 border-t border-gray-700">
           <h3 className="text-sm font-semibold text-teal-400 uppercase tracking-wide">Connection Rules</h3>
           <div>
-            <label htmlFor="strategy" className="block text-sm font-medium text-gray-400 mb-1">Strategy</label>
-            <select id="strategy" name="strategy" value={settings.strategy} onChange={handleInputChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
+            <label htmlFor="strategy" className="block text-sm font-medium text-gray-400 mb-2">Strategy</label>
+            <select id="strategy" name="strategy" value={settings.strategy} onChange={handleInputChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-sm touch-manipulation">
               {Object.values(Strategy).map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
@@ -91,16 +91,16 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <div className="space-y-3 pt-2 border-t border-gray-700">
           <h3 className="text-sm font-semibold text-teal-400 uppercase tracking-wide">Actions</h3>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Seed: {settings.seed}</label>
-            <button onClick={onRandomizeSeed} className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-3 rounded-md transition duration-300 text-sm">
+            <label className="block text-sm font-medium text-gray-400 mb-2">Seed: {settings.seed}</label>
+            <button onClick={onRandomizeSeed} className="w-full bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-bold py-3 px-4 rounded-md transition duration-300 text-sm touch-manipulation">
               Randomize
             </button>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={onExportSvg} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md transition duration-300 text-sm">
+            <button onClick={onExportSvg} className="bg-gray-600 hover:bg-gray-500 active:bg-gray-400 text-white font-bold py-3 px-3 rounded-md transition duration-300 text-sm touch-manipulation">
               Export SVG
             </button>
-            <button onClick={onExportPng} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md transition duration-300 text-sm">
+            <button onClick={onExportPng} className="bg-gray-600 hover:bg-gray-500 active:bg-gray-400 text-white font-bold py-3 px-3 rounded-md transition duration-300 text-sm touch-manipulation">
               Export PNG
             </button>
           </div>

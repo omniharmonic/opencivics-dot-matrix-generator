@@ -104,7 +104,7 @@ export const ArtCanvas = forwardRef<ArtCanvasHandles, ArtCanvasProps>(
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-2xl overflow-hidden aspect-square max-w-full" style={{width: `${width/2}px`, height: `${height/2}px`}}>
+      <div className="bg-white rounded-lg shadow-2xl overflow-hidden aspect-square w-full max-w-[500px] md:max-w-[500px]">
         <svg
           ref={svgRef}
           width="100%"
